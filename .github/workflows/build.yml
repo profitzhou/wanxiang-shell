@@ -18,6 +18,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-levels: 34
+          build-tools: 34.0.0
+
       - name: Download and setup Gradle
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
@@ -27,6 +33,8 @@ jobs:
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --console=plain
+        env:
+          ANDROID_HOME: ${{ steps.setup-android.outputs.android-sdk-path }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
