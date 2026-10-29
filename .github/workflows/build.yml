@@ -18,20 +18,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-levels: 34
-          build-tools: 34.0.0
-        id: setup-android
-
-      - name: Show SDK paths
+      - name: Install Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls $ANDROID_HOME 2>/dev/null || echo "no ANDROID_HOME"
+          mkdir -p $HOME/android-sdk && cd $HOME/android-sdk
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+          ls cmdline-tools/latest/bin/
+        env:
+          ANDROID_HOME: $HOME/android-sdk
 
-      - name: Download and setup Gradle
+      - name: Accept licenses and install platforms
+        run: |
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        env:
+          ANDROID_HOME: $HOME/android-sdk
+
+      - name: Setup Gradle
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
           unzip -q gradle-8.5-bin.zip -d /opt
@@ -40,6 +45,9 @@ jobs:
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --console=plain
+        env:
+          ANDROID_HOME: $HOME/android-sdk
+          ANDROID_SDK_ROOT: $HOME/android-sdk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
