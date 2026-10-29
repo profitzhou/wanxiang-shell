@@ -1,6 +1,7 @@
 package com.wanxiang.shell;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -11,11 +12,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.PermissionRequest;
 import android.net.wifi.WifiManager;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private static final String TARGET_URL = "https://deskai.reexin.cn/flash/";
     private static final String DEFAULT_LIC = "EMO-VYPB-KDHQ-U8Y4";
@@ -26,18 +23,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         String[] needPerms = { Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA };
         boolean needReq = false;
         for (String p : needPerms) {
-            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED) {
                 needReq = true;
                 break;
             }
         }
-        if (needReq) ActivityCompat.requestPermissions(this, needPerms, PERM_REQ);
+        if (needReq) requestPermissions(needPerms, PERM_REQ);
 
         String deviceId = getDeviceId();
 
